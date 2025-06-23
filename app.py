@@ -19,42 +19,38 @@ class_names = ['Kucing', 'Anjing']
 def index():
     return render_template('index.html')
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    if 'file' not in request.files:
-        return 'No file uploaded!', 400
+@app.route('/klasifikasi', methods=['GET', 'POST'])
+def klasifikasi():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return 'Tidak ada file yang diunggah', 400
 
-    file = request.files['file']
-    if file.filename == '':
-        return 'No selected file', 400
+        file = request.files['file']
+        if file.filename == '':
+            return 'Tidak ada file yang dipilih', 400
 
-    try:
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(filepath)
+        try:
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            file.save(filepath)
 
-        img = image.load_img(filepath, target_size=(224, 224))
-        img_tensor = image.img_to_array(img)
-        img_tensor = np.expand_dims(img_tensor, axis=0)
-        img_tensor /= 255.0
+            img = image.load_img(filepath, target_size=(224, 224))
+            img_tensor = image.img_to_array(img)
+            img_tensor = np.expand_dims(img_tensor, axis=0)
+            img_tensor /= 255.0
 
-        prediction = model.predict(img_tensor)
-        
-        if prediction.shape[1] > 1:
-            class_index = np.argmax(prediction[0])
-        else:
-            class_index = int(prediction[0] > 0.5)
-            
-        result = class_names[class_index]
-        image_url = os.path.join('uploads', file.filename).replace(os.path.sep, '/')
-        
-        return render_template('index.html', prediction=result, image_path=image_url)
+            prediction = model.predict(img_tensor)
 
-    except Exception as e:
-        # Jika ada error, tampilkan di halaman web untuk debugging
-        error_message = f"Terjadi error: {e}"
-        return render_template('index.html', prediction=error_message)
+            class_index = np.argmax(prediction[0]) if prediction.shape[1] > 1 else int(prediction[0] > 0.5)
+            result = class_names[class_index]
+            image_url = os.path.join('uploads', file.filename).replace(os.path.sep, '/')
 
-import os
+            return render_template('klasifikasi.html', prediction=result, image_path=image_url)
+
+        except Exception as e:
+            return render_template('klasifikasi.html', prediction=f"Terjadi error: {e}")
+
+    # Jika GET
+    return render_template('klasifikasi.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
