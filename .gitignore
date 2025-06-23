@@ -1,0 +1,32 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.VENV/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Flask instance folder
+instance/
+
+# VS Code settings
+.vscode/
+
+# Jupyter Notebook checkpoints
+*.ipynb_checkpoints
+
+# Model files
+*.h5
+*.hdf5
+*.pb
+*.joblib
+
+# Environment variables
+.env
+
+# Mac
